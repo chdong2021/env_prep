@@ -1,0 +1,6 @@
+---
+bond_ip: 192.168.40.20/24
+mode: 2
+miimon: 100
+max_bonds: 1
+xmit_hash_policy: layer3+4

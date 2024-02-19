@@ -1,0 +1,19 @@
+---
+- name: remove the kvm module
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - kvm_intel
+    - kvm
+
+- name: start the kvm module
+  community.general.modprobe:
+    name: kvm
+    state: present
+    params: 'tdp_mmu=Y'
+
+- name: start the kvm_intel module
+  community.general.modprobe:
+    name: kvm_intel
+    state: present

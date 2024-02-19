@@ -1,0 +1,20 @@
+---
+  - name: make sure chronyd is installed
+    ansible.builtin.dnf:
+     name: chrony
+     state: latest
+     update_cache: yes
+
+  - name: deploy chrony.conf template
+    ansible.builtin.lineinfile:
+     dest: /etc/chrony.conf
+     line: "server 10.11.160.238 iburst"
+     owner: root
+     group: root
+     mode: 0644
+     backup: yes
+
+  - name: Restart chronyd
+    ansible.builtin.service:
+      name: chronyd
+      state: restarted

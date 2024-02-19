@@ -1,0 +1,43 @@
+---
+- name: Set the network configuration of bond0
+  community.general.nmcli:
+    type: bond
+    conn_name: bond0
+    ipv4: "{{ bond_ip }}"
+    mode: "{{ mode }}"
+    state: present
+
+- name: Set the slaves of bond0
+  community.general.nmcli:
+    type: bond-slave
+    conn_name: "{{ item }}"
+    if_name: "{{ item }}"
+    master: bond0
+    state: present
+  loop:
+    - ens6np0
+    - ens5f0
+
+- name: Set the switch 
+  community.general.nmcli:
+    type: bridge
+    conn_name: sw20
+    state: present
+
+- name: Set the slave of the sw20
+  community.general.nmcli:
+    type: bridge-slave
+    conn_name: ens5f1
+    master: sw20
+    autoconnect: true
+    state: present
+
+- name: set mtu to 9000
+  community.general.nmcli:
+    conn_name: {{ item }}
+    mtu: 9000
+    state: present
+  loop:
+    - bond0
+    - ens6np0
+    - ens5f0

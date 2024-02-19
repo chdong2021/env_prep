@@ -1,0 +1,41 @@
+---
+- name: Prepare the environment of huge memory machine
+  hosts: host2
+  become: true
+  tasks:
+    - name: Execute the grubby command to set hugepage and iommu
+      ansible.builtin.shell:
+        cmd: "grubby --update-kernel=/boot/vmlinuz-$(uname -r) --args='intel_iommu=on iommu=pt default_hugepagesz=1GB hugepagesz=1G tsx=on hugepages=12280'"
+      notify: RebootHost  
+
+    - name: Copy the hugetlb-reserve-pages.sh to controlled host
+      ansible.builtin.copy:
+        src: files/hugetlb-reserver-pages.sh
+        dest: /usr/lib/systemd/
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Create the hugetlb-reserve-pages service
+      ansible.builtin.template:
+        src: templates/hugetlb-reserve-pages.service.j2
+        dest: /usr/lib/systemd/system/hugetlb-gigantic-pages.service
+      notify: Enable and restart hugetlb-reserve-pages.service
+          
+    
+  handlers:
+    - name: RebootHost
+      ansible.builtin.reboot:  
+
+    - name: Enable and restart hugetlb-reserve-pages.service
+      ansible.builtin.service:
+        name: hugetlb-gigantic-pages.service
+        enabled: yes
+        state: started
+        
+
+
+
+
+
+        

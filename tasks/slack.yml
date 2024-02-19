@@ -1,0 +1,8 @@
+---
+- name: Notice my slack account
+  community.general.slack:
+    domain: "redhat.slack.com"
+    channel: "@chdong"
+    token: "HJgtUWXHZIOjXiuppQMBAuWX"
+    username: "AnsibleNotification"
+    msg: "All of the tasks are finished"

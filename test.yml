@@ -1,0 +1,14 @@
+---
+- name: test the function of ansible-navigator on host
+  hosts: lenovo-sr950-02.lab.eng.pek2.redhat.com
+  become: yes
+  remote_user: root
+  tasks:
+    - name: print the hostname
+      ansible.builtin.command:
+        cmd: hostname
+      register: hostname_return
+
+    - name: print return hostname
+      ansible.builtin.debug:
+        vars: hostname_return

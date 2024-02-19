@@ -1,0 +1,102 @@
+---
+- name: Prepare the environment of huge memory machine
+  hosts: host2
+  become: true
+  remote_user: root
+  vars_files: vars/common_vars
+
+  tasks:
+    - name: Execute the grubby command to set hugepage and iommu
+      ansible.builtin.shell:
+        cmd: "grubby --update-kernel=/boot/vmlinuz-$(uname -r) --args='intel_iommu=on iommu=pt default_hugepagesz=1GB hugepagesz=1G tsx=on hugepages=12280'"
+
+    - name: Modify the number of hugepages in every node
+      ansible.builtin.lineinfile:
+        path: /sys/devices/system/node/node{{ item }}/hugepages/hugepages-1048576kB/nr_hugepages
+        search_string: '0'
+        line: '1355'
+      with_sequence: start=0 end=7
+      notify: RebootHost
+
+    - name: Install some packages
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
+        - ansible-core.x86_64
+        - libvirt
+        - expect
+        - bwm-ng
+        - tuned
+
+    - name: Stop and disable ksm and ksmtuned service
+      ansible.builtin.service:
+        name: "{{ item }}"
+        enabled: no
+        state: absent
+      loop:
+        - ksm
+        - ksmtuned
+   
+    - name: Actice the sap-hana-kvm-host tuned profile
+      ansible.builtin.include_tasks: tasks/set-tuned-profile.yml
+
+    - name: Add timesync setting in chrony
+      ansible.builtin.include_tasks: tasks/time_sync.yml
+
+    - name: Add tcp in libvirt.conf
+      ansible.builtin.lineinfile:
+        path: /etc/libvirt/libvirtd.conf
+        line: 'auth_tcp = "none"'
+      notify: Stop libvirtd service
+
+    - name: Start libvirtd-tcp.socket when libvirtd is stopped
+      ansible.builtin.service:
+          name: libvirtd-tcp.socket
+          state: started
+      when: 
+        ansible_facts.services.libvirtd.state is stopped
+
+    - name: Set network configuration
+      ansible.builtin.include_tasks:
+        tasks/set_network.yml
+
+    - name: Create the images folder
+      ansible.builtin.file:
+        path: /nfs/images
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Mount the nfs server 
+      ansible.posix.mount:
+        src: 192.168.20.11:/mnt/images
+        path: /nfs/images
+        fstype: nfs
+        state: mounted
+
+    - name: Include the kvm modprobe task
+      ansible.builtin.include_tasks:
+        tasks/kvm_tdp_mmu.yml
+
+  handlers:
+    - name: RebootHost
+      ansible.builtin.reboot:  
+
+    - name: Stop libvirtd service
+      ansible.builtin.service:
+        name: libvirtd
+        state: stopped
+
+  post_tasks:
+    - name: send notification to slack
+      ansible.builtin.include_tasks: tasks/slack.yml
+        
+
+
+
+
+
+        

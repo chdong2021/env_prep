@@ -1,0 +1,9 @@
+[host2]
+lenovo-sr950-02.lab.eng.pek2.redhat.com
+
+[host3]
+lenovo-sr950-03.lab.eng.pek2.redhat.com
+
+[all_hosts]
+lenovo-sr950-02.lab.eng.pek2.redhat.com
+lenovo-sr950-03.lab.eng.pek2.redhat.com
