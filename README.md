@@ -13,3 +13,8 @@ The list of tasks:
 6. Set the tuned profile that is suit for sap_hana_hypervisor
 7. Disable ksm and ksmtuned service, modify the kvm and kvm_intel by modprobe
 8. Stop libvirtd service and start libvirtd-tcp.socket for migration
+
+Before running the playbook, please prepare the ansible environment:
+
+podman login regirstry.redhat.io  #login with your redhat kerboros id
+podman pull registry.redhat.io/ansible-automation-platform-22/ee-supported-rhel9:latest
