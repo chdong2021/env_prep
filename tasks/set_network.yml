@@ -3,7 +3,7 @@
   community.general.nmcli:
     type: bond
     conn_name: bond0
-    ipv4: "{{ bond_ip }}"
+    ip4: "{{ bond_ip }}"
     mode: "{{ mode }}"
     state: present
 
@@ -11,7 +11,7 @@
   community.general.nmcli:
     type: bond-slave
     conn_name: "{{ item }}"
-    if_name: "{{ item }}"
+    ifname: "{{ item }}"
     master: bond0
     state: present
   loop:
@@ -32,12 +32,21 @@
     autoconnect: true
     state: present
 
-- name: set mtu to 9000
+- name: set bond0 mtu to 9000
   community.general.nmcli:
-    conn_name: {{ item }}
+    conn_name: "{{ item }}"
     mtu: 9000
     state: present
+    type: ethernet
   loop:
     - bond0
+
+- name: set mtu to 9000
+  community.general.nmcli:
+    conn_name: "{{ item }}"
+    mtu: 9000
+    state: present
+    type: bond-slave
+  loop:
     - ens6np0
-    - ens5f0
+    - ens5f0    

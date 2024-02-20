@@ -1,0 +1,13 @@
+---
+ansible-navigator:
+  execution-environment:
+    container-engine: podman
+    image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+    enabled: true
+
+      #  playbook-artifact:
+      #    save-as: /home/devops/playbook-artifacts/{playbook_name}-artifact-{ts_utc}.json
+
+  logging:
+    level: debug
+

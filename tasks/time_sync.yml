@@ -1,10 +1,4 @@
 ---
-  - name: make sure chronyd is installed
-    ansible.builtin.dnf:
-     name: chrony
-     state: latest
-     update_cache: yes
-
   - name: deploy chrony.conf template
     ansible.builtin.lineinfile:
      dest: /etc/chrony.conf

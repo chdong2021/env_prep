@@ -34,7 +34,8 @@
       ansible.builtin.service:
         name: "{{ item }}"
         enabled: no
-        state: absent
+        state: stopped
+      ignore_errors: true
       loop:
         - ksm
         - ksmtuned
@@ -51,12 +52,17 @@
         line: 'auth_tcp = "none"'
       notify: Stop libvirtd service
 
-    - name: Start libvirtd-tcp.socket when libvirtd is stopped
+    - name: Get the status of libvirtd.service
+      ansible.builtin.systemd:
+        name: "libvirtd"
+      register:  libvirtd_status 
+
+    - name: Start libvirtd-tcp.socket when libvirtd is inactive
       ansible.builtin.service:
           name: libvirtd-tcp.socket
           state: started
       when: 
-        ansible_facts.services.libvirtd.state is stopped
+        libvirtd_status['status']['ActiveState'] == 'inactive'
 
     - name: Set network configuration
       ansible.builtin.include_tasks:
@@ -90,13 +96,8 @@
         name: libvirtd
         state: stopped
 
-  post_tasks:
-    - name: send notification to slack
-      ansible.builtin.include_tasks: tasks/slack.yml
-        
-
-
-
-
-
+  # post_tasks:
+  #   - name: send notification to slack
+  #     ansible.builtin.include_tasks: tasks/slack.yml
+  #     ignore_errors: yes
         
