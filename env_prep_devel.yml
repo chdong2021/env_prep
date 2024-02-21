@@ -10,14 +10,43 @@
       ansible.builtin.shell:
         cmd: "grubby --update-kernel=/boot/vmlinuz-$(uname -r) --args='intel_iommu=on iommu=pt default_hugepagesz=1GB hugepagesz=1G tsx=on hugepages=12280'"
 
-    - name: Modify the number of hugepages in every node
-      ansible.builtin.lineinfile:
-        path: /sys/devices/system/node/node{{ item }}/hugepages/hugepages-1048576kB/nr_hugepages
-        search_string: '0'
-        line: '1355'
-      with_sequence: start=0 end=7
+    # - name: Modify the number of hugepages in every node
+    #   ansible.builtin.lineinfile:
+    #     path: /sys/devices/system/node/node{{ item }}/hugepages/hugepages-1048576kB/nr_hugepages
+    #     search_string: '^0'
+    #     line: 1355
+    #     unsafe_writes: yes
+    #   with_sequence: start=0 end=7
+    #   notify: RebootHost
+
+    # - name: Modify the number of hugepages in numa nodes
+    #   ansible.builtin.template: 
+    #     src: files/nr_hugepages.j2
+    #     dest: /sys/devices/system/node/node{{ item }}/hugepages/hugepages-1048576kB/nr_hugepages
+    #     owner: root
+    #     group: root
+    #     unsafe_writes: yes
+    #     mode: 0644
+    #   loop: 
+    #     - 0
+    #     - 1
+    #     - 2
+    #     - 3
+    #     - 4
+    #     - 5
+    #     - 6
+    #     - 7
+    
+    - name: Run the hugepagetlb service scripts
+      ansible.builtin.import_tasks:
+        file: tasks/hugepage_service.yml
       notify: RebootHost
 
+    - name: Install the GPG key for epel repo
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+        
     - name: Install some packages
       ansible.builtin.dnf:
         name: "{{ item }}"
@@ -41,7 +70,8 @@
         - ksmtuned
    
     - name: Actice the sap-hana-kvm-host tuned profile
-      ansible.builtin.include_tasks: tasks/set-tuned-profile.yml
+      ansible.builtin.include_tasks: 
+        file: tasks/set-tuned-profile.yml
 
     - name: Add timesync setting in chrony
       ansible.builtin.include_tasks: tasks/time_sync.yml
@@ -59,14 +89,14 @@
 
     - name: Start libvirtd-tcp.socket when libvirtd is inactive
       ansible.builtin.service:
-          name: libvirtd-tcp.socket
-          state: started
+        name: libvirtd-tcp.socket
+        state: started
       when: 
         libvirtd_status['status']['ActiveState'] == 'inactive'
 
     - name: Set network configuration
       ansible.builtin.include_tasks:
-        tasks/set_network.yml
+        file: tasks/set_network.yml
 
     - name: Create the images folder
       ansible.builtin.file:
@@ -85,7 +115,7 @@
 
     - name: Include the kvm modprobe task
       ansible.builtin.include_tasks:
-        tasks/kvm_tdp_mmu.yml
+        file: tasks/kvm_tdp_mmu.yml
 
   handlers:
     - name: RebootHost

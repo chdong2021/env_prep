@@ -2,7 +2,18 @@
 - name: test the function of ansible-navigator on host
   hosts: lenovo-sr950-02.lab.eng.pek2.redhat.com
   gather_facts: yes
+  become: yes
   tasks:
-  - name: Print facts
-    ansible.builtin.debug:
-      msg: '{{ ansible_facts }}'  
+  - name: test the number input
+    ansible.builtin.template:
+      src: files/nr_hugepages.j2
+      dest: /root/test{{ item }}.file
+      owner: root
+      group: root
+      mode: 0644
+      unsafe_writes: yes
+    loop:
+        - 1
+        - 2
+        - 0
+        

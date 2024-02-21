@@ -1,0 +1,22 @@
+---
+- name: Create the hugetlb-gigantic-pages.service
+  ansible.builtin.copy:
+    src: files/hugetlb-gigantic-pages.service
+    dest: /usr/lib/systemd/system/hugetlb-gigantic-pages.service
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create the script about hugetlb-reserver-pages.sh
+  ansible.builtin.copy:
+    src: files/hugetlb-reserve-pages.sh
+    dest: /usr/lib/systemd/hugetlb-reserve-pages.sh
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Start the hugetlb-gigantic-pages.service
+  ansible.builtin.service:
+    name: hugetlb-gigantic-pages.service
+    enabled: yes
+    state: started

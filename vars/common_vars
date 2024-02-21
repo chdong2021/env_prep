@@ -1,3 +1,5 @@
 timesync_ntp_servers:
   - hostname: 10.11.160.238
     iburst: yes
+
+hugepage_number: 1355
