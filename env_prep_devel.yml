@@ -58,6 +58,7 @@
         - expect
         - bwm-ng
         - tuned
+        - systemtap
 
     - name: Stop and disable ksm and ksmtuned service
       ansible.builtin.service:
