@@ -88,6 +88,10 @@
         name: "libvirtd"
       register:  libvirtd_status 
 
+    - name: Show the status of libvirtd
+      ansible.builtin.debug:
+        var: libvirtd_status
+        
     - name: Start libvirtd-tcp.socket when libvirtd is inactive
       ansible.builtin.service:
         name: libvirtd-tcp.socket

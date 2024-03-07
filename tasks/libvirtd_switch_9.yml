@@ -1,0 +1,71 @@
+---
+- name: Stop and disable the libvirtd
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  loop:
+    - libvirtd.service
+    - libvirtd.socekt
+    - libvirtd-ro.socket
+    - libvirtd-admin.socket
+    - libvirtd-tcp.socket
+    - libvirtd-tls.socket
+
+- name: Start and enable the virtlogd
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - virtlogd.service
+    - virtlogd.socket
+
+- name: Start all of the split virt daemons
+  ansible.builtin.systemd:
+    name: "{{ item }}"d
+    state: started
+    masked: no
+    enabled: yes
+  loop:
+    - qemu 
+    - interface 
+    - network 
+    - nodedev 
+    - nwfilter 
+    - secret 
+    - storage 
+    - proxy
+
+- name: Start all of the split virt daemons
+  ansible.builtin.systemd:
+    name: "{{ item }}"d-ro
+    state: started
+    masked: no
+    enabled: yes
+  loop:
+    - qemu 
+    - interface 
+    - network 
+    - nodedev 
+    - nwfilter 
+    - secret 
+    - storage 
+    - proxy
+
+- name: Start all of the split virt daemons
+  ansible.builtin.systemd:
+    name: "{{ item }}"d-admin
+    state: started
+    masked: no
+    enabled: yes
+  loop:
+    - qemu
+    - interface
+    - network
+    - nodedev
+    - nwfilter
+    - secret
+    - storage
+    - proxy
+

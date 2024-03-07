@@ -4,16 +4,19 @@
   gather_facts: yes
   become: yes
   tasks:
-  - name: test the number input
-    ansible.builtin.template:
-      src: files/nr_hugepages.j2
-      dest: /root/test{{ item }}.file
-      owner: root
-      group: root
-      mode: 0644
-      unsafe_writes: yes
-    loop:
-        - 1
-        - 2
-        - 0
-        
+    - name: Get the status of libvirtd.service
+      ansible.builtin.systemd:
+        name: "libvirtd"
+      register:  libvirtd_status
+
+    - name: Show the status of libvirtd
+      ansible.builtin.debug:
+        var: libvirtd_status
+
+    - name: Start libvirtd-tcp.socket when libvirtd is inactive
+      ansible.builtin.service:
+        name: libvirtd-tcp.socket
+        state: started
+      when:
+        libvirtd_status['status']['ActiveState'] == 'inactive'
+
