@@ -122,14 +122,18 @@
       ansible.builtin.include_tasks:
         file: tasks/kvm_tdp_mmu.yml
 
+    - name: Run the libvirt switch task
+      ansible.builtin.include_tasks:
+        file: tasks/libvirtd_switch_9.yml
+
   handlers:
     - name: RebootHost
       ansible.builtin.reboot:  
 
-    - name: Stop libvirtd service
-      ansible.builtin.service:
-        name: libvirtd
-        state: stopped
+        #    - name: Stop libvirtd service
+        # ansible.builtin.service:
+        # name: libvirtd
+        # state: stopped
 
   # post_tasks:
   #   - name: send notification to slack

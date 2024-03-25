@@ -6,7 +6,7 @@
     enabled: no
   loop:
     - libvirtd.service
-    - libvirtd.socekt
+    - libvirtd.socket
     - libvirtd-ro.socket
     - libvirtd-admin.socket
     - libvirtd-tcp.socket
@@ -23,7 +23,23 @@
 
 - name: Start all of the split virt daemons
   ansible.builtin.systemd:
-    name: "{{ item }}"d
+    name: "virt{{ item }}d"
+    state: started
+    masked: no
+    enabled: yes
+  loop:
+    - qemu 
+    - interface 
+    - network 
+    - nodedev 
+    - nwfilter 
+    - secret 
+    - storage 
+    - proxy
+
+- name: Start all of the split virt socket daemons
+  ansible.builtin.systemd:
+    name: "virt{{ item }}d-ro.socket"
     state: started
     masked: no
     enabled: yes
@@ -39,23 +55,7 @@
 
 - name: Start all of the split virt daemons
   ansible.builtin.systemd:
-    name: "{{ item }}"d-ro
-    state: started
-    masked: no
-    enabled: yes
-  loop:
-    - qemu 
-    - interface 
-    - network 
-    - nodedev 
-    - nwfilter 
-    - secret 
-    - storage 
-    - proxy
-
-- name: Start all of the split virt daemons
-  ansible.builtin.systemd:
-    name: "{{ item }}"d-admin
+    name: "virt{{ item }}d-admin.socket"
     state: started
     masked: no
     enabled: yes
